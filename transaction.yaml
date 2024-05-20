@@ -1,0 +1,500 @@
+openapi: 3.0.3
+info:
+  title: Bank Argent API documentation
+  description: This Swagger file contains APIs for managing transactions, which is a part of the overall project API
+  termsOfService: 'http://swagger.io/terms/'
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: https://localhost:3001/api/v1
+tags:
+  - name: Account
+    description: Access user accounts
+  - name: Transactions
+    description: Access user transactions for the current month, grouped by account
+paths:
+  /user/accounts:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Account
+      summary: Retrieve user accounts
+      description: Fetch all accounts belonging to the authenticated user
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Accounts'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+  /user/accounts/{accountId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Account
+      summary: Retrieve a specific account 
+      description: Fetch a specific account belonging to the authenticated user
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: accountId
+          description: Account ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Account retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+    put:
+      security:
+        - Bearer: []
+      summary: Update transaction
+      description: Update details of a specific transaction
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT Token
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  $ref: '#/components/schemas/Category'
+                notes:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Note'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal server error
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete transaction fields
+      description: Delete the category and/or notes of a specific transaction
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: category
+          description: If true, delete the category of the transaction
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: noteId
+          description: The ID of the note to delete from the transaction
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Value (s) deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal server error
+  /user/transactions:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions
+      summary: Retrieve user transactions for the current month
+      description: Fetch transactions of the authenticated user for the specified month and year, grouped by account
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: month
+          description: The month for which to retrieve transactions (1-12)
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - in: query
+          name: year
+          description: The year for which to retrieve transactions
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transactions'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction note found
+        '500':
+          description: Internal server error
+  /user/transactions/{transactionId}:
+    get:
+      security:
+        - Bearer: []
+      tags:
+        - Transactions
+      summary: Retrieve transaction details
+      description: Fetch details of a specific transaction by its ID
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal server error
+    put:
+      security:
+        - Bearer: []
+      summary: Update transaction
+      description: Update details of a specific transaction
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT Token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                # description:
+                #   type: string
+                # amount:
+                #   type: number
+                # type:
+                #   type: string
+                category:
+                  $ref: '#/components/schemas/Category'
+                notes:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Note'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal server error
+    delete:
+      security:
+        - Bearer: []
+      summary: Delete transaction fields
+      description: Delete the category and/or notes of a specific transaction
+      parameters:
+        - in: header
+          name: Authorization
+          description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: transactionId
+          description: The ID of the transaction
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: category
+          description: If true, delete the category of the transaction
+          required: false
+          schema:
+            type: boolean
+        - in: query
+          name: noteId
+          description: The ID of the note to delete from the transaction
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Value (s) deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized access
+        '404':
+          description: Transaction not found
+        '500':
+          description: Internal server error
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email
+          example: 'tony@stark.com'
+        password:
+          type: string
+          description: User password
+          example: 'password123'
+        firstName:
+          type: string
+          description: User first name
+          example: 'Tony'
+        lastName:
+          type: string
+          description: User last name
+          example: 'Stark'
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Account ID
+          example: 'Account 1'
+        title:
+          type: string
+          description: Account title
+          example: 'Argent Bank Checking (x8349)'
+        amount:
+          type: number
+          description: Account amount
+          example: 2082.79
+        description: 
+          type: string
+          description: Account description
+          example: 'Available Balance'
+    Accounts:
+      type: array
+      description: List of user accounts
+      items:
+        $ref: '#/components/schemas/Account'
+    Category:
+      type: string
+      description: Examples of category values of a transaction
+      enum:
+        - Food
+        - Entertainment
+        - Utilities
+        - Travel
+        - Education
+    Note:
+      type: object
+      description: Note of a transaction
+      properties:
+        id:
+          type: string
+          description: Note ID
+        description:
+          type: string
+          description: Note description
+    Transaction:
+      type: object
+      properties: 
+        id:
+          type: string
+          description: Transaction ID
+          example: 'Transaction 1'
+        date:
+          type: string
+          description: Transaction date
+          format: date-time
+        description:
+          type: string
+          description: Transaction description
+          example: 'Golden Sun Bakery'
+        amount:
+          type: number
+          description: Transaction amount
+          example: 5
+        balance:
+          type: number
+          description: Transaction balance
+          example: 2082.79
+        type:
+          type: string
+          description: Transaction type
+          example: 'Electronic'
+        category:
+          $ref: '#/components/schemas/Category'
+        notes:
+          type: array
+          description: Transaction Notes
+          items:
+            $ref: '#/components/schemas/Note'
+          example:
+            - id: 'Note 1'
+              description: 'First Note'
+            - id: 'Note 2'
+              description: 'Seconde Note'
+    Transactions:
+      type: array
+      description: List of user transactions
+      items:
+        $ref: '#/components/schemas/Transaction'
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        body:
+          type: object
+          properties:
+            transaction:
+              $ref: '#/components/schemas/Transaction'
