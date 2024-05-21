@@ -14,9 +14,9 @@ function App() {
       <Header signIn="on" />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/signIn" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/signUp" element={<SignUpPage />} />
-        <Route path="/user" element={<UserPage />} />
+        <Route path="/profile" element={<UserPage />} />
         <Route path="*" element={<ErrorPage />} />
       </Routes>
       <Footer />

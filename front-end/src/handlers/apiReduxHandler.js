@@ -73,7 +73,7 @@ class ApiReduxHandler {
     }
 
     static logout(dispatch) {
-        dispatch(logout(null));
+        dispatch(logout());
         API.token = null;
     }
 

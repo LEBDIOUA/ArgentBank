@@ -12,7 +12,7 @@ function Header() {
 
     const signOut = () => {
         ApiReduxHandler.logout(dispatch);
-        navigate("/signIn");
+        navigate("/");
         setEtatCnx(false);
     }
 
@@ -30,13 +30,13 @@ function Header() {
 
                 {(!etatCnx) &&
                     <div>
-                        <NavLink className="main-nav-item" to="/signIn"> <i className="fa fa-user-circle"></i> Sign In </NavLink>
+                        <NavLink className="main-nav-item" to="/login"> <i className="fa fa-user-circle"></i> Sign In </NavLink>
                     </div>
                 }
 
                 {(etatCnx && user) &&
                     <div>
-                        <NavLink className="main-nav-item" to="/user"> <i className="fa fa-user-circle"></i> {user.firstName} </NavLink>
+                        <NavLink className="main-nav-item" to="/profile"> <i className="fa fa-user-circle"></i> {user.firstName} </NavLink>
                         <button className="main-nav-item" onClick={signOut}> <i className="fa fa-sign-out"></i> Sign Out</button>
                     </div>
                 }

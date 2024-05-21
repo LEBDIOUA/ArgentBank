@@ -85,7 +85,7 @@ function LoginPage() {
 
     useEffect(() => {        
         if (loaded && userState) {
-            navigate("/user");
+            navigate("/profile");
         }
 
         if (loading || !loading || error) {

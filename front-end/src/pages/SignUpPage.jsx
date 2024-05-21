@@ -89,7 +89,7 @@ function SignUpPage() {
 
     useEffect(() => {
         if (loaded && userState) {
-            navigate("/user");
+            navigate("/profile");
         }
     }, [loaded, setLoaded]);
 
