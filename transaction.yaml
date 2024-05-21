@@ -10,12 +10,12 @@ info:
 servers:
   - url: https://localhost:3001/api/v1
 tags:
-  - name: Account
+  - name: Accounts
     description: Access user accounts
   - name: Transactions
     description: Access user transactions for the current month, grouped by account
 paths:
-  /user:
+  /user/accounts:
     get:
       security:
         - Bearer: []
@@ -48,7 +48,7 @@ paths:
           description: User not found
         '500':
           description: Internal server error
-  /user/transactions/{accountId}:
+  /user/{accountId}/transactions:
     get:
       security:
         - Bearer: []
@@ -101,110 +101,7 @@ paths:
           description: Transaction note found
         '500':
           description: Internal server error
-    put:
-      security:
-        - Bearer: []
-      summary: Update transaction
-      description: Update details of a specific transaction
-      parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT Token
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: transactionId
-          description: The ID of the transaction
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                # description:
-                #   type: string
-                # amount:
-                #   type: number
-                # type:
-                #   type: string
-                category:
-                  $ref: '#/components/schemas/Category'
-                notes:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Note'
-      responses:
-        '200':
-          description: Transaction updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          description: Invalid request
-        '401':
-          description: Unauthorized access
-        '404':
-          description: Transaction not found
-        '500':
-          description: Internal server error
-    delete:
-      security:
-        - Bearer: []
-      summary: Delete transaction fields
-      description: Delete the category and/or notes of a specific transaction
-      parameters:
-        - in: header
-          name: Authorization
-          description: Attach Bearer JWT token
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: transactionId
-          description: The ID of the transaction
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: category
-          description: If true, delete the category of the transaction
-          required: false
-          schema:
-            type: boolean
-        - in: query
-          name: noteId
-          description: The ID of the note to delete from the transaction
-          required: false
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Value (s) deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          description: Invalid request
-        '401':
-          description: Unauthorized access
-        '404':
-          description: Transaction not found
-        '500':
-          description: Internal server error
-  /user/transactions/transaction/{transactionId}:
+  /user/{accountId}/transaction/{transactionId}:
     get:
       security:
         - Bearer: []
@@ -216,6 +113,12 @@ paths:
         - in: header
           name: Authorization
           description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: accountId
+          description: Account ID
           required: true
           schema:
             type: string
@@ -246,12 +149,18 @@ paths:
     put:
       security:
         - Bearer: []
-      summary: Update transaction
+      summary: Update transaction details
       description: Update details of a specific transaction
       parameters:
         - in: header
           name: Authorization
           description: Attach Bearer JWT Token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: accountId
+          description: Account ID
           required: true
           schema:
             type: string
@@ -268,12 +177,6 @@ paths:
             schema:
               type: object
               properties:
-                # description:
-                #   type: string
-                # amount:
-                #   type: number
-                # type:
-                #   type: string
                 category:
                   $ref: '#/components/schemas/Category'
                 notes:
@@ -301,12 +204,18 @@ paths:
     delete:
       security:
         - Bearer: []
-      summary: Delete transaction fields
+      summary: Delete transaction category and/or notes
       description: Delete the category and/or notes of a specific transaction
       parameters:
         - in: header
           name: Authorization
           description: Attach Bearer JWT token
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: accountId
+          description: Account ID
           required: true
           schema:
             type: string
