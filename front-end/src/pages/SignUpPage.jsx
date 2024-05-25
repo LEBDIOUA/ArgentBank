@@ -19,12 +19,11 @@ function SignUpPage() {
     const pconfirmPasswordRef = useRef(null);
     const loadingRef = useRef(null);
 
-    const userState = useSelector((state) => state.user);
+    const user = useSelector((state) => state.user);
     const [loading, setLoading] = useState(false);
-    const { etatCnx, setEtatCnx } = useEtatCnx(false);
+    const { setEtatCnx } = useEtatCnx(false);
     const [StartSignUp, setStartSignUp] = useState(false);
     const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -47,23 +46,27 @@ function SignUpPage() {
         })
         return err;
     }
+
+    useEffect(() => {
+        if (user) {
+            navigate('/profile')
+        }
+    }, [user, navigate]);
+
     useEffect(() => {
         const signUp = async () => {
             setLoading(true);
-            setError(false);
             try {
                 const err = checkData();
                 if (!err) {
                     const reponse = await ApiReduxHandler.registration(dispatch, firstnameRef.current.value, lastnameRef.current.value, usernameRef.current.value, passwordRef.current.value)
                     if (reponse) {
                         setLoading(false);
-                        setError(true);
                         setStartSignUp(false);
                     }
                 }
                 else {
                     setLoading(true);
-                    setError(true);
                     setStartSignUp(false);
                 }
             }
@@ -72,7 +75,7 @@ function SignUpPage() {
                 setLoading(false);
             }
             finally {
-                if (userState) {
+                if (user) {
                     setTimeout(() => {
                         setLoading(false);
                         setLoaded(true);
@@ -85,13 +88,13 @@ function SignUpPage() {
         if (StartSignUp) {
             signUp();
         }
-    }, [StartSignUp, setStartSignUp, userState]);
+    }, [StartSignUp, setStartSignUp, user, dispatch, setEtatCnx]);
 
     useEffect(() => {
-        if (loaded && userState) {
+        if (loaded && user) {
             navigate("/profile");
         }
-    }, [loaded, setLoaded]);
+    }, [loaded, setLoaded, navigate, user]);
 
 
     useEffect(() => {

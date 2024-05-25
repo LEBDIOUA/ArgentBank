@@ -2,8 +2,6 @@ import axios from 'axios';
 
 class API {
     static instance = null;
-    static token =  null;
-
     static getInstance() {
         if (this.instance === null) {
             this.instance = new API();
@@ -13,6 +11,7 @@ class API {
     }
 
     constructor() {
+        this.token = JSON.parse(localStorage.getItem('userData')) ? JSON.parse(localStorage.getItem('userData')).id : null;
         this.DB_URL = "http://localhost:3001";
         this.data = [];
         this.err = [];
@@ -34,44 +33,53 @@ class API {
     checkURL = async () => {
         try {
             const response = await fetch(this.DB_URL);
+            console.log('checkURL response: ', response);
+            return true;
         }
         catch (error) {
-            this.err.push(error ? error.message : 'error');
+            this.err.push('CONNECTION REFUSED');
+            console.log(this.err)
+            return false;
         }
     }
 
     loginUser = async (user) => {
-        this.checkURL();
-        if (this.err.length == 0) { 
-            const endpointConfig = this.buildEndpoint("GET_LOGIN")
-            const finalURL = this.DB_URL + endpointConfig.url;
+        const endpointConfig = this.buildEndpoint("GET_LOGIN")
+        const finalURL = this.DB_URL + endpointConfig.url;
 
+        if (this.checkURL() && this.err.length === 0) {
             try {
-                const response = await axios.post(finalURL, JSON.stringify(user), {
+                const response = await axios.post(finalURL, JSON.stringify({ email: user.email, password: user.password }), {
                     headers: {
                         'Content-Type': endpointConfig.content_type
                     }
                 })
                 if (response.status == 200) {
                     const responseData = response.data;
-                    // console.log('Connexion avec succès: ', responseData);
-                    return responseData.body.token;
+                    this.token = responseData.body.token;
                 } else {
-                    this.err.push(`Login failed. ${JSON.parse(errorMessage).message}`);
+                    this.err.push('Login failed with status: ' + response.status);
                 }
             }
             catch (error) {
-                this.err.push(error ? error.message : 'error');
+                if (error.response && error.response.status === 400) {
+                    this.err.push(error.response.data.message);
+                } else {
+                    this.err.push(error.message || 'An unknown error occurred');
+                }
+                return { err: this.err };
             }
+        }
+        else {
+            return { err: this.err };
         }
     }
 
     signUpUser = async (user) => {
-        this.checkURL();
-        if (this.err.length == 0) {
-            const endpointConfig = this.buildEndpoint("GET_SIGNUP")
-            const finalURL = this.DB_URL + endpointConfig.url;
+        const endpointConfig = this.buildEndpoint("GET_LOGIN")
+        const finalURL = this.DB_URL + endpointConfig.url;
 
+        if (this.checkURL() && this.err.length === 0) {
             try {
                 const response = await axios.post(finalURL, JSON.stringify(user), {
                     headers: {
@@ -80,56 +88,53 @@ class API {
                 })
                 if (response.status === 200) {
                     const responseData = response.json();
-                    // console.log('Inscription réussie: ', responseData);
-                    return { token: this.loginUser(responseData.body.email, responseData.body.password), data: data, err: null };
+                    return { token: this.loginUser(responseData.body.email, responseData.body.password), data: responseData, err: null };
                 } else {
-                    this.err.push(`Login failed. ${JSON.parse(errorMessage).message}`);
+                    this.err.push('Login failed with status: ' + response.status);
                 }
             }
             catch (error) {
-                this.err.push(error ? error.message : 'error');
+                this.err.push(error ? error.message : 'An unknown error occurred');
             }
-            console.log('Error ! ', this.err.join('; '))
             return { data: null, err: this.err.join('; ') };
+        }
+        else {
+            return { err: this.err };
         }
     }
 
     fetchUser = async (user) => {
         this.err = [];
-        this.token = await this.loginUser(user);
+        await this.loginUser(user);
 
-        if (!this.token) { 
-            this.token = await this.loginUser(user);
-        }
-
-        if (this.token) {
+        if (this.err.length === 0 && this.token) {
             const endpointConfig = this.buildEndpoint("GET_USER")
             const finalURL = this.DB_URL + endpointConfig.url;
             try {
-                const response = await axios.post(finalURL, 
-                    { key: 'value' }, 
-                    { headers: {
-                        Authorization: `Bearer ${this.token}`
-                    }
-                })
+                const response = await axios.post(finalURL,
+                    { key: 'value' },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${this.token}`
+                        }
+                    })
+
                 if (response.status == 200) {
                     const userdata = response.data;
-                    // console.log('Profil utilisateur récupéré avec succès: ', userdata);
-                    return {token: this.token, data: userdata.body, err: null };
+                    return { token: this.token, data: userdata.body, err: null };
                 } else {
-                    throw new Error(`Erreur lors de la récupération du profil utilisateur: ${response.status}`);
+                    this.err.push(`Erreur lors de la récupération du profil utilisateur: ${response.status}`);
                 }
 
             } catch (error) {
                 this.err.push(error)
             }
         }
-        return { data: null, err: this.err.join(', ') };
+        return { token: null, data: null, err: this.err };
     }
 
     setUser = async (user) => {
         this.err = [];
-
         if (this.token) {
             const endpointConfig = this.buildEndpoint("SET_USER");
             const finalURL = this.DB_URL + endpointConfig.url;
@@ -142,10 +147,9 @@ class API {
                 })
                 if (response.status == 200) {
                     const responseData = response.data;
-                    // console.log('Profil utilisateur mis à jour avec succès:', responseData);
-                    return { data: responseData.body, err: null };
+                    return { token: this.token, data: responseData.body, err: null };
                 } else {
-                    throw new Error(`Erreur lors de la mise à jour du profil utilisateur: ${response.status}`);
+                    this.err.push(`Erreur lors de la mise à jour du profil utilisateur: ${response.status}`);
                 }
             }
             catch (error) {
@@ -157,7 +161,7 @@ class API {
             console.log('No Token value!')
             this.err.push('No Token value!');
         }
-        return { data: false, err: this.err };
+        return { token: null, data: false, err: this.err };
     }
 }
 export default API;

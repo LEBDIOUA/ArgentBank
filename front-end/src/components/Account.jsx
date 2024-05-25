@@ -1,4 +1,6 @@
-function Account({account}) {
+import PropTypes from 'prop-types';
+
+function Account({ account }) {
 
     return (
         <section className="account">
@@ -13,4 +15,13 @@ function Account({account}) {
         </section>
     )
 }
+
+Account.propTypes = {
+    account: PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        amount: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+    }).isRequired,
+};
+
 export default Account;

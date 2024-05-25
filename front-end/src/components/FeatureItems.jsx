@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 function FeatureItems({ imgLink, title, para }) {
     return (
         <div className="feature-item">
@@ -7,4 +9,11 @@ function FeatureItems({ imgLink, title, para }) {
         </div>
     )
 }
+
+FeatureItems.propTypes = {
+    imgLink: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    para: PropTypes.string.isRequired,
+};
+
 export default FeatureItems;

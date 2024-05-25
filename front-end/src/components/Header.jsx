@@ -2,19 +2,32 @@ import ApiReduxHandler from "../handlers/apiReduxHandler";
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { useEtatCnx } from "../context/context";
+import { useEffect } from "react";
 
 function Header() {
 
-    const user = useSelector((state) => state.user.user);
+    const user = useSelector((state) => state.user);
     const { etatCnx, setEtatCnx } = useEtatCnx(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const signOut = () => {
         ApiReduxHandler.logout(dispatch);
-        navigate("/");
         setEtatCnx(false);
+        navigate("/");
     }
+
+    useEffect(() => {
+        if (!user) {            
+            setEtatCnx(false);
+        }
+    }, [user, setEtatCnx]);
+
+    useEffect(() => {
+        if (user) {
+            setEtatCnx(true);
+        }
+    }, [user, setEtatCnx]);
 
     return (
         <header>
@@ -28,7 +41,7 @@ function Header() {
                     <h1 className="sr-only">Argent Bank</h1>
                 </NavLink>
 
-                {(!etatCnx) &&
+                {(!etatCnx || (etatCnx && !user)) &&
                     <div>
                         <NavLink className="main-nav-item" to="/login"> <i className="fa fa-user-circle"></i> Sign In </NavLink>
                     </div>
