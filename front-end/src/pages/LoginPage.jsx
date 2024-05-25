@@ -29,7 +29,7 @@ function LoginPage() {
             const passwordValue = passwordRef.current ? passwordRef.current.value : null;
 
             if (!usernameValue || !passwordValue) {
-                alert('Please enter both username and password');
+                msgErrRef.current.innerHTML = 'Please enter both username and password';
                 setLoading(false);
                 return;
             }
